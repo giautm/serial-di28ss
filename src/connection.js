@@ -16,29 +16,30 @@ var Connection = Backbone.Model.extend({
         stopBits: 'one',
         autoConnect: undefined,
         ports: [],
-        buffer: null,
         text: '...',
-        error: '',
+        error: ''
     },
 
-    initialize: function() {
-        chrome.serial.onReceive.addListener(this._onReceive.bind(this));
+    initialize: function () {
         chrome.serial.onReceiveError.addListener(this._onReceiveError.bind(this));
+
+        var port = chrome.runtime.connect({name: "display"});
+        port.onMessage.addListener(this._onReceive.bind(this));
     },
 
-    enumeratePorts: function() {
+    enumeratePorts: function () {
         var self = this;
-        chrome.serial.getDevices(function(ports) {
+        chrome.serial.getDevices(function (ports) {
             self.set('ports', ports);
             self._checkPath();
         });
     },
 
-    hasPorts: function() {
+    hasPorts: function () {
         return this.get('ports').length > 0;
     },
 
-    autoConnect: function(enable) {
+    autoConnect: function (enable) {
         this.set('autoConnect', enable);
         if (enable) {
             this._tryConnect();
@@ -47,7 +48,7 @@ var Connection = Backbone.Model.extend({
         }
     },
 
-    _tryConnect: function() {
+    _tryConnect: function () {
         if (!this.get('autoConnect')) {
             return;
         }
@@ -60,23 +61,23 @@ var Connection = Backbone.Model.extend({
                 bitrate: this.get('bitrate'),
                 dataBits: this.get('dataBits'),
                 parityBit: this.get('parityBit'),
-                stopBits: this.get('stopBits'),
-            }
+                stopBits: this.get('stopBits')
+            };
 
-            chrome.serial.connect(path, opts, function(connectionInfo) {
-                self.set('buffer', new Uint8Array(0));
+            chrome.serial.connect(path, opts, function (connectionInfo) {
                 if (connectionInfo) {
-                  self.set('connectionId', connectionInfo.connectionId);
+                    self.set('connectionId', connectionInfo.connectionId);
+                    self.set('text', 'Đã kết nối');
                 } else {
-                  self.set('connectionId', null);
-                  self.set('autoConnect', false);
-                  self.set('error',
-                      'Connection failed' + 
-                      '<div style="font-size: 0.25em">' + 
-                      'Can\'t open serial port ' + path +
-                      '.<br>Possibly it is already in use ' +
-                      'by another application.' +
-                      '</div>');
+                    self.set('connectionId', null);
+                    self.set('autoConnect', false);
+                    self.set('error',
+                        'Connection failed' +
+                        '<div style="font-size: 0.25em">' +
+                        'Can\'t open serial port ' + path +
+                        '.<br>Possibly it is already in use ' +
+                        'by another application.' +
+                        '</div>');
                 }
             });
         } else {
@@ -85,20 +86,21 @@ var Connection = Backbone.Model.extend({
         }
     },
 
-    _disconnect: function() {
+    _disconnect: function () {
         var cid = this.get('connectionId');
         if (!cid) {
             return;
         }
 
         var self = this;
-        chrome.serial.disconnect(cid, function() {
+        self.set('text', 'Mất kết nối');
+        chrome.serial.disconnect(cid, function () {
             self.set('connectionId', null);
             self.enumeratePorts();
         });
     },
 
-    _checkPath: function() {
+    _checkPath: function () {
         var path = this.get('path');
         var ports = this.get('ports');
 
@@ -107,11 +109,10 @@ var Connection = Backbone.Model.extend({
             return;
         }
 
-        for (var i = 0; i < ports.length; ++i) {
-            var port = ports[i];
-            if (port.path == path) {
-                return;
-            }
+        if (ports.some(function (port) {
+                return port.path == path;
+            })) {
+            return;
         }
 
         // We have to auto-choose any port. Use first
@@ -128,112 +129,116 @@ var Connection = Backbone.Model.extend({
         this.set('path', ports[portIdx].path);
     },
 
-    _onReceive: function(receiveInfo) {
-        var data = receiveInfo.data;
-        data = new Uint8Array(data);
-        this.set('buffer', catBuffers(this.get('buffer'), data));
-
-        var lbr = findLineBreak(this.get('buffer'));
-        if (lbr !== undefined) {
-            var txt = this.get('buffer').slice(0, lbr);
-            this.set('buffer', this.get('buffer').slice(lbr + 1));
-            this.set('text', uintToString(txt));
+    _onReceive: function (data) {
+        console.log(data);
+        if (data) {
+            this.set('text', parseFloat(Math.round(data.weight * 100) / 100).toFixed(2));
         }
     },
 
-    _onReceiveError: function(info) {
+    _onReceiveError: function (info) {
         this._disconnect();
         this.set('error', info.error);
         this.enumeratePorts();
     }
 });
 
-$(function() {
+function setText(txt) {
+    jQuery('h1').html(txt);
+}
+
+jQuery(function () {
     var connection = new Connection();
 
-    connection.on('change:text', function(c) {
+    connection.on('change:text', function (c) {
         var text = c.get('text');
         setText(text);
     });
 
-    connection.on('change:error', function(c) {
+    connection.on('change:error', function (c) {
         var text = c.get('error');
         setText(text);
     });
 
-    connection.on('change:ports', function(c) {
+    connection.on('change:ports', function (c) {
         var ports = c.get('ports');
-        var $port = $('#port');
+        var $port = jQuery('#port');
         $port.empty();
 
         for (var i = 0; i < ports.length; ++i) {
             var port = ports[i];
-            $('<option value="' + port.path + '">' +
-              port.path + ' ' + (port.displayName || '') + '</option>').appendTo($port);
+            jQuery('<option value="' + port.path + '">' +
+                port.path + ' ' + (port.displayName || '') + '</option>').appendTo($port);
         }
 
         if (ports.length == 0) {
-            $('<option value="">[no device found]</option>').appendTo($port);
+            jQuery('<option value="">[no device found]</option>').appendTo($port);
             $port.prop('disabled', true);
         } else {
             $port.val(c.get('path'));
         }
     });
 
-    connection.on('change:autoConnect', function(c) {
+    connection.on('change:autoConnect', function (c) {
         var autoConnect = !!c.get('autoConnect');
-        $('#stop-connection').toggle(autoConnect);
-        $('#connect').toggle(!autoConnect);
-        $('#port').prop('disabled', autoConnect || !c.hasPorts());
-        $('#bitrate, #dataBits, #parityBit, #stopBits').prop('disabled', autoConnect);
+        jQuery('#stop-connection').toggle(autoConnect);
+        jQuery('#connect').toggle(!autoConnect);
+        jQuery('#port').prop('disabled', autoConnect || !c.hasPorts());
+        jQuery('#bitrate, #dataBits, #parityBit, #stopBits').prop('disabled', autoConnect);
     });
 
-    connection.on('change:path', function(c) {
+    connection.on('change:path', function (c) {
         var path = c.get('path');
-        $('#port').val(path);
+        jQuery('#port').val(path);
     });
 
-    connection.on('change:connectionId', function(c) {
+    connection.on('change:connectionId', function (c) {
         var connected = !!c.get('connectionId');
-        $('.btn-connection').toggleClass('connected', connected);
+        if (connected) {
+            jQuery('body').css('background-color', 'green');
+        } else {
+            jQuery('body').css('background-color', 'red');
+        }
+
+        jQuery('.btn-connection').toggleClass('connected', connected);
     });
 
-    $('.btn-connection').click(function(e) {
+    jQuery('.btn-connection').click(function (e) {
         e.preventDefault();
         e.stopPropagation();
-        var $connection = $('#connection');
+        var $connection = jQuery('#connection');
         $connection.toggle(0);
         if ($connection.is(':visible')) {
             connection.enumeratePorts();
         }
     });
 
-    $('#connection').click(function(e) {
+    jQuery('#connection').click(function (e) {
         e.stopPropagation();
     });
 
-    $('body').click(function() {
-        $('#connection').hide();
+    jQuery('body').click(function () {
+        jQuery('#connection').hide();
     });
 
-    $('#connect').click(function(e) {
+    jQuery('#connect').click(function (e) {
         e.preventDefault();
         connection.autoConnect(true);
     });
 
-    $('#port').change(function(e) {
-        connection.set('path', $(this).val());
+    jQuery('#port').change(function (e) {
+        connection.set('path', jQuery(this).val());
     });
 
-    $('#bitrate').change(function(e) {
-        connection.set('bitrate', parseInt($(this).val()));
-    });
+    // jQuery('#bitrate').change(function (e) {
+    //     connection.set('bitrate', parseInt(jQuery(this).val()));
+    // });
+    //
+    // jQuery('#dataBits, #parityBit, #stopBits').change(function (e) {
+    //     connection.set(jQuery(this).attr('name'), jQuery(this).val());
+    // });
 
-    $('#dataBits, #parityBit, #stopBits').change(function(e) {
-        connection.set($(this).attr('name'), $(this).val());
-    });
-
-    $('#stop-connection').click(function(e) {
+    jQuery('#stop-connection').click(function (e) {
         e.preventDefault();
         connection.autoConnect(false);
     });

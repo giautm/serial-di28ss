@@ -14,6 +14,10 @@ body {
     line-height: 100vh;
 }
 
+#wrap h1 {
+    color: white;
+}
+
 h1 {
     text-align: center;
     display: inline-block;
@@ -42,10 +46,6 @@ h1 {
     opacity: 0.5;
 }
 
-#menu .btn-fullscreen {
-    background-image: url('chrome-extension://__MSG_@@extension_id__/img/desktop_000000_32.png');
-}
-
 #menu .btn-connection {
     background-image: url('chrome-extension://__MSG_@@extension_id__/img/chain-broken_000000_32.png');
 }
@@ -56,10 +56,6 @@ h1 {
 
 #menu .btn-settings {
     background-image: url('chrome-extension://__MSG_@@extension_id__/img/cog_000000_32.png');
-}
-
-#menu.light .btn-fullscreen {
-    background-image: url('chrome-extension://__MSG_@@extension_id__/img/desktop_ffffff_32.png');
 }
 
 #menu.light .btn-connection {
