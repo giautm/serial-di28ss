@@ -47,5 +47,5 @@ Sau đó khởi tạo:
 document.addEventListener('di-28ss-data', function (event) {
     console.log(event.detail);
 }
-DI28SS.initialize(document, {extensionId: 'xxxx'});
+DI28SS.initialize(document, {extensionId: 'fchemkcehmoabjidaaelannhmghacdee'});
 ```
