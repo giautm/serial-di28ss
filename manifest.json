@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Serial DI-28SS",
-  "description": "DI-28SS connector",
-  "version": "1.6",
+  "description": "Ứng dụng đọc kết quả từ đầu cân DI-28SS.",
+  "version": "0.1",
   "author": "Giau TM (giau.tmg@gmail.com)",
   "app": {
     "background": {
@@ -13,16 +13,15 @@
     }
   },
   "icons": {
-    "32": "icon/icon32.png",
-    "48": "icon/icon48.png",
-    "64": "icon/icon64.png",
-    "128": "icon/icon128.png"
+    "32": "icon/tiki32.png",
+    "48": "icon/tiki48.png",
+    "64": "icon/tiki64.png",
+    "128": "icon/tiki128.png"
   },
   "externally_connectable": {
     "matches": [
       "*://*.tiki.vn/*",
-      "*://*.tiki.com/*",
-      "https://developer.chrome.com/extensions/messaging"
+      "*://*.tiki.com/*"
     ]
   },
   "permissions": [
