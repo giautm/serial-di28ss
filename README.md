@@ -7,8 +7,8 @@ Cho phép các trang web truy cập được kết quả từ đầu cân DI-28S
 Cài đặt
 ------------
 
-Tìm ứng dụng Serial DI-28SS trên [Chrome Web Store]()
-và nhấp vào “Add to Browser... (Thêm vào trình duyệt...)”.
+Tải ứng dụng Serial DI-28SS [tại đây](https://github.com/giautm/serial-di28ss/blob/master/serial-di28ss.crx?raw=true)
+Mở [chrome://extensions/](chrome://extensions/) và kéo thả vào trình duyệt Chrome.
 
 Sử dụng
 -----
