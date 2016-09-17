@@ -19,7 +19,7 @@ Uint8Array.prototype.slice = function(begin, end) {
     }
 
     return result;
-}
+};
 
 function catBuffers(a, b) {
     var result = new Uint8Array(a.length + b.length);

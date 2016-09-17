@@ -2,13 +2,12 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <script src="jquery-2.1.4.min.js"></script>
-        <script src="underscore.js"></script>
-        <script src="backbone.js"></script>
-        <script src="main.js"></script>
-        <script src="connection.js"></script>
-        <script src="settings.js"></script>
-        <script src="about.js"></script>
+        <script src="lib/jquery-2.1.4.min.js"></script>
+        <script src="lib/underscore.js"></script>
+        <script src="lib/backbone.js"></script>
+        <script src="src/main.js"></script>
+        <script src="src/connection.js"></script>
+        <script src="src/settings.js"></script>
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
@@ -20,7 +19,6 @@
             <div class="btn btn-fullscreen" title="Fullscreen [F11 or F]"></div>
             <div class="btn btn-connection" title="Connection [C]"></div>
             <div class="btn btn-settings" title="Settings [F10]"></div>
-            <div class="btn btn-about" title="About [F1]"></div>
         </aside>
 
         <aside id="connection" class="popup">
@@ -110,19 +108,6 @@
                     </tr>
                 </tbody>
             </table>
-        </aside>
-
-        <aside id="about" class="popup">
-            <p>
-                Serial Projector is made by <a href="http://amperka.ru" target="_blank">Amperka LLC</a>. From Russia with Love :-*
-            </p>
-            <p>
-                Icons by <a href="http://fortawesome.github.io/Font-Awesome/" target="_blank">Font Awesome</a>.
-            </p>
-            <p>
-                Application is distributed as is without any warranties on terms of MIT License.
-                <a href="https://github.com/amperka/serial-projector" target="_blank">Source code</a> is available on GitHub.
-            </p>
         </aside>
     </body>
 </html>
